@@ -1,0 +1,35 @@
+name: Orcak
+version: '1.0'
+main: top.mcocet.orcak.Orcak
+api-version: '1.21'
+authors: [ MCOCET ]
+description: 给物品绑定药水效果，手持即可激活
+website: https://home.mcocet.top
+folia-supported: true
+
+commands:
+  stat:
+    description: 查看玩家游戏统计数据
+    usage: /stat [玩家名]
+    permission: orcak.command.stat
+  orcak:
+    description: Orcak 插件管理命令
+    usage: /orcak <sync|set|help>
+    permission: orcak.admin
+
+permissions:
+  orcak.bypass.help:
+    description: 允许绕过自定义help命令，使用原版help
+    default: op
+  orcak.command.stat:
+    description: 允许使用/stat命令查看统计数据
+    default: true
+  orcak.admin:
+    description: Orcak 管理员权限
+    default: op
+  orcak.admin.sync:
+    description: 允许同步原版数据
+    default: op
+  orcak.admin.set:
+    description: 允许修改玩家统计数据
+    default: op

@@ -1,0 +1,8 @@
+# Orcak插件配置文件
+# 配置选项将在未来版本中添加
+
+# 是否启用自定义help命令
+enable-custom-help: true
+
+# help.txt文件路径（相对于插件数据目录）
+help-file-path: "command/help.txt"
