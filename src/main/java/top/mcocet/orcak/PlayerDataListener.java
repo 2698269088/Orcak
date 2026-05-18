@@ -7,6 +7,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.UUID;
+
 /**
  * 玩家数据监听器
  * 记录玩家的登录、登出、击杀和死亡事件
@@ -27,7 +29,23 @@ public class PlayerDataListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        databaseManager.onPlayerLogin(player.getUniqueId(), player.getName());
+        UUID uuid = player.getUniqueId();
+        databaseManager.onPlayerLogin(uuid, player.getName());
+        
+        // 启动实时计时任务 (Folia 兼容)
+        if (plugin.isFolia()) {
+            player.getScheduler().runAtFixedRate(plugin, (task) -> {
+                if (player.isOnline()) {
+                    databaseManager.updatePlayTime(uuid);
+                }
+            }, null, 1L, 20L); // 初始延迟1 tick，之后每20 ticks (1秒) 执行一次
+        } else {
+            org.bukkit.Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+                if (player.isOnline()) {
+                    databaseManager.updatePlayTime(uuid);
+                }
+            }, 0L, 20L);
+        }
     }
     
     /**

@@ -6,3 +6,10 @@ enable-custom-help: true
 
 # help.txt文件路径（相对于插件数据目录）
 help-file-path: "command/help.txt"
+
+# 聊天颜色设置
+chat-colors:
+  # 默认玩家名字颜色 (使用 Minecraft 颜色代码: &0-&9, &a-&f)
+  default-name-color: "&f"
+  # 默认聊天消息颜色
+  default-message-color: "&7"

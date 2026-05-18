@@ -78,6 +78,8 @@ public class DatabaseManager {
                 last_login_time INTEGER DEFAULT 0,
                 kills INTEGER DEFAULT 0,
                 deaths INTEGER DEFAULT 0,
+                name_color TEXT DEFAULT '&f',
+                message_color TEXT DEFAULT '&7',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -85,6 +87,18 @@ public class DatabaseManager {
         
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createTableSQL);
+            
+            // 检查并添加新列（兼容旧数据库）
+            try {
+                stmt.execute("ALTER TABLE player_stats ADD COLUMN name_color TEXT DEFAULT '&f';");
+            } catch (SQLException e) {
+                // 列已存在，忽略错误
+            }
+            try {
+                stmt.execute("ALTER TABLE player_stats ADD COLUMN message_color TEXT DEFAULT '&7';");
+            } catch (SQLException e) {
+                // 列已存在，忽略错误
+            }
         }
     }
     
@@ -100,14 +114,16 @@ public class DatabaseManager {
      */
     public synchronized void savePlayerStats(PlayerStats stats) {
         String sql = """
-            INSERT INTO player_stats (player_uuid, player_name, play_time, last_login_time, kills, deaths, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            INSERT INTO player_stats (player_uuid, player_name, play_time, last_login_time, kills, deaths, name_color, message_color, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(player_uuid) DO UPDATE SET
                 player_name = excluded.player_name,
                 play_time = excluded.play_time,
                 last_login_time = excluded.last_login_time,
                 kills = excluded.kills,
                 deaths = excluded.deaths,
+                name_color = excluded.name_color,
+                message_color = excluded.message_color,
                 updated_at = CURRENT_TIMESTAMP;
             """;
         
@@ -118,6 +134,8 @@ public class DatabaseManager {
             pstmt.setLong(4, stats.getLastLoginTime());
             pstmt.setInt(5, stats.getKills());
             pstmt.setInt(6, stats.getDeaths());
+            pstmt.setString(7, stats.getNameColor());
+            pstmt.setString(8, stats.getMessageColor());
             pstmt.executeUpdate();
             
             // 更新缓存
@@ -150,7 +168,9 @@ public class DatabaseManager {
                         rs.getLong("play_time"),
                         rs.getLong("last_login_time"),
                         rs.getInt("kills"),
-                        rs.getInt("deaths")
+                        rs.getInt("deaths"),
+                        rs.getString("name_color"),
+                        rs.getString("message_color")
                     );
                     
                     // 加入缓存
@@ -181,18 +201,27 @@ public class DatabaseManager {
     }
     
     /**
+     * 更新玩家游戏时长（每秒调用）
+     */
+    public void updatePlayTime(UUID playerId) {
+        PlayerStats stats = playerStatsCache.get(playerId);
+        if (stats != null) {
+            stats.addPlayTime(1); // 增加1秒
+            // 这里可以选择是否每秒都写入数据库，为了性能通常建议只在内存累加，定期保存
+            // 如果希望实时性极高，可以取消下面这行的注释，但会增加数据库压力
+            // savePlayerStats(stats);
+        }
+    }
+    
+    /**
      * 记录玩家登出
      */
     public void onPlayerLogout(UUID playerId, String playerName) {
-        Long loginTime = playerLoginTimes.remove(playerId);
-        if (loginTime != null) {
-            long sessionTime = (System.currentTimeMillis() - loginTime) / 1000; // 转换为秒
-            
-            PlayerStats stats = playerStatsCache.get(playerId);
-            if (stats != null) {
-                stats.addPlayTime(sessionTime);
-                savePlayerStats(stats);
-            }
+        playerLoginTimes.remove(playerId);
+        
+        PlayerStats stats = playerStatsCache.get(playerId);
+        if (stats != null) {
+            savePlayerStats(stats);
         }
     }
     
@@ -224,21 +253,8 @@ public class DatabaseManager {
     public PlayerStats getPlayerStats(UUID playerId) {
         PlayerStats stats = playerStatsCache.get(playerId);
         if (stats != null) {
-            // 如果玩家在线，计算当前会话的实时时长
-            Long loginTime = playerLoginTimes.get(playerId);
-            if (loginTime != null) {
-                long currentSessionTime = (System.currentTimeMillis() - loginTime) / 1000;
-                // 返回一个包含实时时长的副本，避免污染缓存中的基础数据
-                PlayerStats realTimeStats = new PlayerStats(
-                    stats.getPlayerId(), 
-                    stats.getPlayerName(), 
-                    stats.getPlayTime() + currentSessionTime, 
-                    stats.getLastLoginTime(), 
-                    stats.getKills(), 
-                    stats.getDeaths()
-                );
-                return realTimeStats;
-            }
+            // 由于我们已经在 updatePlayTime 中每秒更新内存，直接返回缓存即可
+            return stats;
         }
         return stats;
     }
@@ -380,6 +396,23 @@ public class DatabaseManager {
                 break;
             default:
                 return false;
+        }
+        
+        savePlayerStats(stats);
+        return true;
+    }
+    
+    /**
+     * 设置玩家聊天颜色
+     */
+    public synchronized boolean setPlayerChatColor(UUID playerId, String playerName, String nameColor, String messageColor) {
+        PlayerStats stats = loadPlayerStats(playerId, playerName);
+        
+        if (nameColor != null) {
+            stats.setNameColor(nameColor);
+        }
+        if (messageColor != null) {
+            stats.setMessageColor(messageColor);
         }
         
         savePlayerStats(stats);

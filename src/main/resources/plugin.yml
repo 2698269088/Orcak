@@ -1,5 +1,5 @@
 name: Orcak
-version: '1.0'
+version: '1.1'
 main: top.mcocet.orcak.Orcak
 api-version: '1.21'
 authors: [ MCOCET ]
@@ -14,7 +14,7 @@ commands:
     permission: orcak.command.stat
   orcak:
     description: Orcak 插件管理命令
-    usage: /orcak <sync|set|help>
+    usage: /orcak <sync|set|color|help>
     permission: orcak.admin
 
 permissions:
@@ -33,3 +33,6 @@ permissions:
   orcak.admin.set:
     description: 允许修改玩家统计数据
     default: op
+  orcak.command.color:
+    description: 允许设置聊天颜色
+    default: true

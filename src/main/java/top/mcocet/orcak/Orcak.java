@@ -24,6 +24,9 @@ public final class Orcak extends JavaPlugin {
         // 注册玩家数据监听器
         getServer().getPluginManager().registerEvents(new PlayerDataListener(this, databaseManager), this);
         
+        // 注册聊天颜色监听器
+        getServer().getPluginManager().registerEvents(new ChatColorListener(this, databaseManager), this);
+        
         // 注册stat命令执行器和补全器
         StatCommandExecutor statExecutor = new StatCommandExecutor(this, databaseManager);
         getCommand("stat").setExecutor(statExecutor);
@@ -57,5 +60,17 @@ public final class Orcak extends JavaPlugin {
      */
     public ConfigManager getConfigManager() {
         return configManager;
+    }
+    
+    /**
+     * 检查是否为 Folia 环境
+     */
+    public boolean isFolia() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }

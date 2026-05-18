@@ -4,6 +4,8 @@
 [![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Folia-blue.svg)](https://papermc.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+前言：不知道为什么要取这个名字，莫名其妙想到的，就决定用了（
+
 Orcak 是一个功能丰富的 Minecraft 服务器插件，提供自定义帮助系统、玩家数据统计、跨版本支持等功能。完全兼容 Folia 区域化多线程架构。
 
 ## ✨ 主要功能
@@ -20,6 +22,13 @@ Orcak 是一个功能丰富的 Minecraft 服务器插件，提供自定义帮助
 - **数据查询**：`/stat` 命令查看自己或他人的游戏数据
 - **原版同步**：`/orcak sync` 一键从原版统计文件迁移数据
 - **手动修改**：`/orcak set` 直接编辑数据库中的统计数据
+
+### 🎨 聊天颜色自定义
+- **个性化设置**：玩家可自定义名字颜色和聊天消息颜色
+- **独立配置**：名字颜色和消息颜色可分别设置
+- **持久化保存**：颜色偏好存储在数据库中，重启不丢失
+- **默认配置**：管理员可在 config.yml 中设置全局默认颜色
+- **即时生效**：设置后立即应用，无需重启服务器
 
 ### 🔧 管理员工具
 - **数据同步**：批量或单独同步玩家的原版统计数据
@@ -68,15 +77,57 @@ Orcak 是一个功能丰富的 Minecraft 服务器插件，提供自定义帮助
 - `kills` / `kill` - 击杀数量
 - `deaths` / `death` - 死亡数量
 
+### 聊天颜色命令
+
+| 命令 | 描述 | 权限 |
+|------|------|------|
+| `/orcak color <名字颜色> [消息颜色]` | 设置聊天颜色 | `orcak.command.color` |
+
+**示例：**
+```bash
+# 只设置名字为红色
+/orcak color &c
+
+# 名字红色，消息绿色
+/orcak color &c &a
+
+# 名字金黄色，消息白色
+/orcak color &6 &f
+```
+
+**可用颜色代码：**
+- `&0` 黑色 | `&1` 深蓝 | `&2` 深绿 | `&3` 深青
+- `&4` 深红 | `&5` 深紫 | `&6` 金黄 | `&7` 灰色
+- `&8` 深灰 | `&9` 蓝色 | `&a` 绿色 | `&b` 青色
+- `&c` 红色 | `&d` 粉色 | `&e` 黄色 | `&f` 白色
+
 ## ⚙️ 配置文件
 
 ### 目录结构
 ```
 plugins/Orcak/
-├── config.yml          # 插件主配置（未来扩展用）
+├── config.yml          # 插件主配置
 ├── players.db          # SQLite 数据库（自动生成）
 └── command/
     └── help.txt        # 自定义帮助内容
+```
+
+### 配置文件说明
+
+#### config.yml
+```yaml
+# 是否启用自定义help命令
+enable-custom-help: true
+
+# help.txt文件路径（相对于插件数据目录）
+help-file-path: "command/help.txt"
+
+# 聊天颜色设置
+chat-colors:
+  # 默认玩家名字颜色 (使用 Minecraft 颜色代码: &0-&9, &a-&f)
+  default-name-color: "&f"
+  # 默认聊天消息颜色
+  default-message-color: "&7"
 ```
 
 ### 编辑帮助内容
@@ -103,6 +154,7 @@ plugins/Orcak/
 |------|------|------|
 | `orcak.bypass.help` | 绕过自定义帮助，使用原版 | OP |
 | `orcak.command.stat` | 使用 /stat 命令 | 所有玩家 |
+| `orcak.command.color` | 设置聊天颜色 | 所有玩家 |
 | `orcak.admin` | Orcak 管理员总权限 | OP |
 | `orcak.admin.sync` | 同步原版数据 | OP |
 | `orcak.admin.set` | 修改玩家数据 | OP |
@@ -149,6 +201,22 @@ K/D 比率：2.33
 /orcak set Steve kills 100
 ```
 
+### 设置聊天颜色
+```bash
+# 只设置名字颜色为红色
+/orcak color &c
+
+# 同时设置名字和消息颜色
+/orcak color &c &a
+
+# 查看效果（聊天时会显示）
+Steve: 这是一条测试消息
+```
+
+**聊天效果示例：**
+- 红色名字 + 绿色消息：`§cSteve§a 你好世界！`
+- 金黄色名字 + 白色消息：`§6Alex§f 大家好！`
+
 ## 🛠️ 技术特性
 
 ### 线程安全
@@ -162,9 +230,15 @@ K/D 比率：2.33
 - 插件禁用时优雅关闭数据库连接
 
 ### 实时计算
-- 在线玩家的游玩时间实时累加
+- 在线玩家的游玩时间实时累加（每秒更新）
 - 击杀和死亡事件即时记录
 - 无需等待下线即可查看最新数据
+
+### 聊天颜色系统
+- 监听 `AsyncPlayerChatEvent` 动态应用颜色
+- 支持 Folia 异步线程环境
+- 颜色代码自动转换（& → §）
+- 优先使用玩家自定义颜色，回退到全局默认配置
 
 ## 📝 开发信息
 
@@ -190,7 +264,8 @@ src/main/java/top/mcocet/orcak/
 ├── HelpCommandExecutor.java   # 帮助命令监听器
 ├── StatCommandExecutor.java   # 统计命令执行器
 ├── OrcakCommand.java          # 管理命令执行器
-└── PlayerDataListener.java    # 玩家数据事件监听器
+├── PlayerDataListener.java    # 玩家数据事件监听器
+└── ChatColorListener.java     # 聊天颜色监听器
 ```
 
 ## 🤝 贡献指南

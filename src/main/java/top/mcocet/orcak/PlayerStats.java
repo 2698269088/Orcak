@@ -13,6 +13,8 @@ public class PlayerStats {
     private long lastLoginTime; // 上次登录时间（时间戳）
     private int kills; // 击杀数量
     private int deaths; // 被击杀数量
+    private String nameColor; // 玩家名字颜色
+    private String messageColor; // 聊天消息颜色
     
     public PlayerStats(UUID playerId, String playerName) {
         this.playerId = playerId;
@@ -21,6 +23,8 @@ public class PlayerStats {
         this.lastLoginTime = System.currentTimeMillis();
         this.kills = 0;
         this.deaths = 0;
+        this.nameColor = "&f"; // 默认白色
+        this.messageColor = "&7"; // 默认灰色
     }
     
     public PlayerStats(UUID playerId, String playerName, long playTime, long lastLoginTime, int kills, int deaths) {
@@ -30,6 +34,19 @@ public class PlayerStats {
         this.lastLoginTime = lastLoginTime;
         this.kills = kills;
         this.deaths = deaths;
+        this.nameColor = "&f";
+        this.messageColor = "&7";
+    }
+    
+    public PlayerStats(UUID playerId, String playerName, long playTime, long lastLoginTime, int kills, int deaths, String nameColor, String messageColor) {
+        this.playerId = playerId;
+        this.playerName = playerName;
+        this.playTime = playTime;
+        this.lastLoginTime = lastLoginTime;
+        this.kills = kills;
+        this.deaths = deaths;
+        this.nameColor = nameColor != null ? nameColor : "&f";
+        this.messageColor = messageColor != null ? messageColor : "&7";
     }
     
     // Getters and Setters
@@ -83,6 +100,22 @@ public class PlayerStats {
     
     public void addDeath() {
         this.deaths++;
+    }
+    
+    public String getNameColor() {
+        return nameColor;
+    }
+    
+    public void setNameColor(String nameColor) {
+        this.nameColor = nameColor;
+    }
+    
+    public String getMessageColor() {
+        return messageColor;
+    }
+    
+    public void setMessageColor(String messageColor) {
+        this.messageColor = messageColor;
     }
     
     @Override
