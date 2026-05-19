@@ -13,3 +13,60 @@ chat-colors:
   default-name-color: "&f"
   # 默认聊天消息颜色
   default-message-color: "&7"
+
+# 区块实体限制设置
+chunk-entity-limits:
+  # 是否启用区块实体数量限制
+  enabled: true
+  # 单个区块最大生物数量（包括动物、怪物等所有LivingEntity）
+  max-mobs: 20
+  # 单个区块最大实体总数（包括物品、经验球、矿车等所有实体）
+  max-entities: 100
+  # 检查间隔（tick），每隔多少tick检查一次区块实体数量
+  check-interval: 20
+  # 是否记录清理日志
+  log-cleanup: false
+
+# 聊天频率限制设置
+chat-rate-limit:
+  # 是否启用聊天频率限制
+  enabled: true
+  # 消息发送间隔时间（秒），默认1秒
+  interval-seconds: 1
+  # 是否启用防重复消息功能
+  anti-duplicate: true
+  # 重复消息检测的时间窗口（秒），在此时间内发送相同消息会被拦截
+  duplicate-window: 10
+  # 管理员是否不受限制
+  bypass-for-admins: true
+  # 当消息被拦截时是否发送提示给玩家
+  send-warning: true
+  # 警告消息内容
+  warning-message: "&c请不要频繁发送消息！"
+  duplicate-warning-message: "&c请不要重复发送相同的消息！"
+
+# 区块凋落物限制设置
+chunk-item-limits:
+  # 是否启用区块凋落物数量限制
+  enabled: true
+  # 单个区块最大凋落物数量（物品实体）
+  max-items: 2000
+  # 检查间隔（tick），每隔多少tick检查一次区块凋落物数量
+  check-interval: 40
+  # 当超过限制时，是否删除最旧的凋落物
+  remove-oldest: true
+  # 是否记录清理日志
+  log-cleanup: false
+
+# 玩家伤害限制设置
+damage-limit:
+  # 是否启用玩家单次伤害限制
+  enabled: false
+  # 玩家单次造成的最大伤害值（默认100）
+  max-damage: 100.0
+  # 管理员是否不受限制
+  bypass-for-admins: true
+  # 当伤害被限制时是否发送提示给攻击者
+  send-warning: true
+  # 警告消息内容（{damage}会被替换为实际伤害值，{max}会被替换为最大伤害值）
+  warning-message: "&c你的攻击伤害过高！原始伤害: {damage}, 限制为: {max}"

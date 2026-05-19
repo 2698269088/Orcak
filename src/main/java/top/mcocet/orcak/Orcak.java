@@ -27,6 +27,18 @@ public final class Orcak extends JavaPlugin {
         // 注册聊天颜色监听器
         getServer().getPluginManager().registerEvents(new ChatColorListener(this, databaseManager), this);
         
+        // 注册区块实体限制监听器
+        getServer().getPluginManager().registerEvents(new ChunkEntityLimitListener(this, configManager), this);
+        
+        // 注册聊天频率限制监听器
+        getServer().getPluginManager().registerEvents(new ChatRateLimitListener(this, configManager), this);
+        
+        // 注册区块凋落物限制监听器
+        getServer().getPluginManager().registerEvents(new ChunkItemLimitListener(this, configManager), this);
+        
+        // 注册玩家伤害限制监听器
+        getServer().getPluginManager().registerEvents(new DamageLimitListener(this, configManager), this);
+        
         // 注册stat命令执行器和补全器
         StatCommandExecutor statExecutor = new StatCommandExecutor(this, databaseManager);
         getCommand("stat").setExecutor(statExecutor);

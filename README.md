@@ -6,7 +6,7 @@
 
 前言：不知道为什么要取这个名字，莫名其妙想到的，就决定用了（
 
-Orcak 是一个功能丰富的 Minecraft 服务器插件，提供自定义帮助系统、玩家数据统计、跨版本支持等功能。完全兼容 Folia 区域化多线程架构。
+Orcak 是一个综合性的 Minecraft 无政府服务器插件，提供自定义帮助系统、玩家数据统计、跨版本支持等功能。完全兼容 Folia 区域化多线程架构。
 
 ## ✨ 主要功能
 
@@ -29,6 +29,33 @@ Orcak 是一个功能丰富的 Minecraft 服务器插件，提供自定义帮助
 - **持久化保存**：颜色偏好存储在数据库中，重启不丢失
 - **默认配置**：管理员可在 config.yml 中设置全局默认颜色
 - **即时生效**：设置后立即应用，无需重启服务器
+
+### 💬 聊天频率限制
+- **防刷屏保护**：限制玩家发送消息的频率（默认1秒/条）
+- **防重复检测**：阻止短时间内发送相同内容（默认5秒窗口）
+- **管理员豁免**：OP 或有权限的管理员不受限制
+- **友好提示**：可自定义警告消息，支持颜色代码
+- **完全可配置**：所有参数均可在 config.yml 中调整
+
+### 🌍 区块实体管理
+- **生物数量限制**：限制单个区块的最大生物数量（默认20个）
+- **实体总数控制**：限制区块内所有实体的总数（默认100个）
+- **智能清理**：可选择删除最旧的实体，保留新生成的
+- **实时监控**：定期检查并自动清理超额实体
+- **性能优化**：防止区块实体过多导致服务器卡顿
+
+### 🗑️ 区块凋落物限制
+- **物品数量控制**：限制单个区块的凋落物数量（默认2000个）
+- **自动清理**：定期扫描并清理超额凋落物
+- **详细日志**：可选的清理日志，记录物品类型和数量
+- **服务器优化**：防止农场、刷怪塔等产生大量物品导致 lag
+
+### ⚔️ 玩家伤害限制
+- **单次伤害上限**：限制玩家一次攻击的最大伤害值（默认100）
+- **默认关闭**：功能默认禁用，需要时手动开启
+- **平衡战斗**：防止一击必杀，确保 PVP 公平性
+- **管理员豁免**：OP 或有权限的管理员不受限制
+- **动态提示**：显示原始伤害和限制值
 
 ### 🔧 管理员工具
 - **数据同步**：批量或单独同步玩家的原版统计数据
@@ -128,6 +155,63 @@ chat-colors:
   default-name-color: "&f"
   # 默认聊天消息颜色
   default-message-color: "&7"
+
+# 区块实体限制设置
+chunk-entity-limits:
+  # 是否启用区块实体数量限制
+  enabled: true
+  # 单个区块最大生物数量（包括动物、怪物等所有LivingEntity）
+  max-mobs: 20
+  # 单个区块最大实体总数（包括物品、经验球、矿车等所有实体）
+  max-entities: 100
+  # 检查间隔（tick），每隔多少tick检查一次区块实体数量
+  check-interval: 20
+  # 是否记录清理日志
+  log-cleanup: false
+
+# 聊天频率限制设置
+chat-rate-limit:
+  # 是否启用聊天频率限制
+  enabled: true
+  # 消息发送间隔时间（秒），默认1秒
+  interval-seconds: 1
+  # 是否启用防重复消息功能
+  anti-duplicate: true
+  # 重复消息检测的时间窗口（秒），在此时间内发送相同消息会被拦截
+  duplicate-window: 10
+  # 管理员是否不受限制
+  bypass-for-admins: true
+  # 当消息被拦截时是否发送提示给玩家
+  send-warning: true
+  # 警告消息内容
+  warning-message: "&c请不要频繁发送消息！"
+  duplicate-warning-message: "&c请不要重复发送相同的消息！"
+
+# 区块凋落物限制设置
+chunk-item-limits:
+  # 是否启用区块凋落物数量限制
+  enabled: true
+  # 单个区块最大凋落物数量（物品实体）
+  max-items: 2000
+  # 检查间隔（tick），每隔多少tick检查一次区块凋落物数量
+  check-interval: 40
+  # 当超过限制时，是否删除最旧的凋落物
+  remove-oldest: true
+  # 是否记录清理日志
+  log-cleanup: false
+
+# 玩家伤害限制设置
+damage-limit:
+  # 是否启用玩家单次伤害限制
+  enabled: false
+  # 玩家单次造成的最大伤害值（默认100）
+  max-damage: 100.0
+  # 管理员是否不受限制
+  bypass-for-admins: true
+  # 当伤害被限制时是否发送提示给攻击者
+  send-warning: true
+  # 警告消息内容（{damage}会被替换为实际伤害值，{max}会被替换为最大伤害值）
+  warning-message: "&c你的攻击伤害过高！原始伤害: {damage}, 限制为: {max}"
 ```
 
 ### 编辑帮助内容
@@ -155,6 +239,8 @@ chat-colors:
 | `orcak.bypass.help` | 绕过自定义帮助，使用原版 | OP |
 | `orcak.command.stat` | 使用 /stat 命令 | 所有玩家 |
 | `orcak.command.color` | 设置聊天颜色 | 所有玩家 |
+| `orcak.chat.bypass` | 绕过聊天频率限制 | OP |
+| `orcak.damage.bypass` | 绕过伤害限制 | OP |
 | `orcak.admin` | Orcak 管理员总权限 | OP |
 | `orcak.admin.sync` | 同步原版数据 | OP |
 | `orcak.admin.set` | 修改玩家数据 | OP |
@@ -217,6 +303,53 @@ Steve: 这是一条测试消息
 - 红色名字 + 绿色消息：`§cSteve§a 你好世界！`
 - 金黄色名字 + 白色消息：`§6Alex§f 大家好！`
 
+### 配置区块实体限制
+```yaml
+# config.yml
+chunk-entity-limits:
+  enabled: true          # 启用限制
+  max-mobs: 20           # 每个区块最多20个生物
+  max-entities: 100      # 每个区块最多100个实体
+  check-interval: 20     # 每20tick(1秒)检查一次
+  log-cleanup: false     # 不记录清理日志
+```
+
+### 配置聊天频率限制
+```yaml
+# config.yml
+chat-rate-limit:
+  enabled: true              # 启用限制
+  interval-seconds: 1        # 每条消息间隔1秒
+  anti-duplicate: true       # 启用防重复
+  duplicate-window: 5        # 5秒内不允许重复消息
+  bypass-for-admins: true    # 管理员豁免
+  send-warning: true         # 发送警告
+  warning-message: "&c请不要频繁发送消息！"
+  duplicate-warning-message: "&c请不要重复发送相同的消息！"
+```
+
+### 配置凋落物限制
+```yaml
+# config.yml
+chunk-item-limits:
+  enabled: true          # 启用限制
+  max-items: 2000        # 每个区块最多2000个凋落物
+  check-interval: 40     # 每40tick(2秒)检查一次
+  remove-oldest: true    # 删除最旧的凋落物
+  log-cleanup: false     # 不记录清理日志
+```
+
+### 配置伤害限制
+```yaml
+# config.yml
+damage-limit:
+  enabled: false             # 默认关闭，需要时开启
+  max-damage: 100.0          # 最大伤害100
+  bypass-for-admins: true    # 管理员豁免
+  send-warning: true         # 发送警告
+  warning-message: "&c你的攻击伤害过高！原始伤害: {damage}, 限制为: {max}"
+```
+
 ## 🛠️ 技术特性
 
 ### 线程安全
@@ -240,6 +373,24 @@ Steve: 这是一条测试消息
 - 颜色代码自动转换（& → §）
 - 优先使用玩家自定义颜色，回退到全局默认配置
 
+### 区块管理系统
+- **智能调度**：Folia 环境使用主线程同步任务，非 Folia 使用异步任务
+- **延迟启动**：监听 WorldLoadEvent，确保世界完全加载后启动
+- **双重保护**：事件拦截 + 定期扫描，全面控制实体数量
+- **性能优化**：可配置的检查间隔，平衡性能和实时性
+
+### 聊天频率限制
+- **高优先级处理**：使用 HIGH 优先级确保及时拦截
+- **时间窗口检测**：精确计算消息间隔和重复检测
+- **线程安全**：使用 ConcurrentHashMap 存储玩家消息记录
+- **Folia 兼容**：支持 Folia 服务器的异步调度
+
+### 伤害限制系统
+- **HIGHEST 优先级**：在其他插件之后处理，避免冲突
+- **动态调整**：只修改超过限制的傷害，不影响正常战斗
+- **占位符支持**：警告消息支持 {damage} 和 {max} 动态替换
+- **管理员豁免**：灵活的权限控制系统
+
 ## 📝 开发信息
 
 ### 构建项目
@@ -247,7 +398,7 @@ Steve: 这是一条测试消息
 mvn clean package
 ```
 
-编译后的 JAR 文件位于 `target/Orcak-1.0.jar`
+编译后的 JAR 文件位于 `target/Orcak-1.2.jar`
 
 ### 依赖项
 - **Paper API** 1.21.4-R0.1-SNAPSHOT
@@ -257,15 +408,19 @@ mvn clean package
 ### 项目结构
 ```
 src/main/java/top/mcocet/orcak/
-├── Orcak.java                 # 主类
-├── ConfigManager.java         # 配置管理
-├── DatabaseManager.java       # 数据库管理
-├── PlayerStats.java           # 玩家数据模型
-├── HelpCommandExecutor.java   # 帮助命令监听器
-├── StatCommandExecutor.java   # 统计命令执行器
-├── OrcakCommand.java          # 管理命令执行器
-├── PlayerDataListener.java    # 玩家数据事件监听器
-└── ChatColorListener.java     # 聊天颜色监听器
+├── Orcak.java                     # 主类
+├── ConfigManager.java             # 配置管理
+├── DatabaseManager.java           # 数据库管理
+├── PlayerStats.java               # 玩家数据模型
+├── HelpCommandExecutor.java       # 帮助命令监听器
+├── StatCommandExecutor.java       # 统计命令执行器
+├── OrcakCommand.java              # 管理命令执行器
+├── PlayerDataListener.java        # 玩家数据事件监听器
+├── ChatColorListener.java         # 聊天颜色监听器
+├── ChatRateLimitListener.java     # 聊天频率限制监听器
+├── ChunkEntityLimitListener.java  # 区块实体限制监听器
+├── ChunkItemLimitListener.java    # 区块凋落物限制监听器
+└── DamageLimitListener.java       # 伤害限制监听器
 ```
 
 ## 🤝 贡献指南
