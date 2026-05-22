@@ -4,9 +4,9 @@
 [![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Folia-blue.svg)](https://papermc.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-前言：不知道为什么要取这个名字，莫名其妙想到的，就决定用了（
+前言：功能大多都是生存服务器用得到的，但我一开始是给类2B2T服务器开发的，也不打算做成ESS这种插件。不知道为什么要取这个名字，莫名其妙想到的，就决定用了（
 
-Orcak 是一个综合性的 Minecraft 无政府服务器插件，提供自定义帮助系统、玩家数据统计、跨版本支持等功能。完全兼容 Folia 区域化多线程架构。
+Orcak 是一个综合性的 Minecraft 生存服务器插件，提供自定义帮助系统、玩家数据统计、聊天管理，玩家跟随等功能。完全兼容 Folia 区域化多线程架构。
 
 ## ✨ 主要功能
 
@@ -25,17 +25,26 @@ Orcak 是一个综合性的 Minecraft 无政府服务器插件，提供自定义
 
 ### 🎨 聊天颜色自定义
 - **个性化设置**：玩家可自定义名字颜色和聊天消息颜色
-- **独立配置**：名字颜色和消息颜色可分别设置
+- **多种格式**：支持英文名称（red, blue）、中文名称（红, 蓝）和颜色代码（&c, &9）
+- **独立命令**：使用 `/chatcolor` 命令，简单便捷
 - **持久化保存**：颜色偏好存储在数据库中，重启不丢失
 - **默认配置**：管理员可在 config.yml 中设置全局默认颜色
 - **即时生效**：设置后立即应用，无需重启服务器
+- **智能补全**：支持 Tab 键自动补全颜色名称和代码
 
-### 💬 聊天频率限制
+###  聊天频率限制与禁言系统
 - **防刷屏保护**：限制玩家发送消息的频率（默认1秒/条）
-- **防重复检测**：阻止短时间内发送相同内容（默认5秒窗口）
+- **防重复检测**：阻止短时间内发送相同内容（默认10秒窗口）
+- **玩家禁言**：管理员可禁言/解禁特定玩家（`/orcak mute/unmute`）
+- **代发消息**：管理员可以任何玩家名义发送消息（`/orcak say`）
 - **管理员豁免**：OP 或有权限的管理员不受限制
 - **友好提示**：可自定义警告消息，支持颜色代码
 - **完全可配置**：所有参数均可在 config.yml 中调整
+
+###  自杀命令
+- **快捷自杀**：提供 `/514` 和 `/k` 两个快捷命令
+- **即死效果**：直接将玩家生命值设置为0
+- **简单便捷**：无需参数，输入命令即可自杀
 
 ### 🌍 区块实体管理
 - **生物数量限制**：限制单个区块的最大生物数量（默认20个）
@@ -60,6 +69,8 @@ Orcak 是一个综合性的 Minecraft 无政府服务器插件，提供自定义
 ### 🔧 管理员工具
 - **数据同步**：批量或单独同步玩家的原版统计数据
 - **数据编辑**：灵活修改玩家的游玩时间、击杀和死亡数据
+- **禁言管理**：禁言/解禁违规玩家，维护聊天秩序
+- **代发消息**：以指定玩家名义广播消息（不受禁言影响）
 - **TAB 补全**：完整的命令自动补全支持，提升管理效率
 
 ### 🌐 兼容性
@@ -89,6 +100,9 @@ Orcak 是一个综合性的 Minecraft 无政府服务器插件，提供自定义
 | `/help orcak` | 强制显示插件帮助内容 | 默认 |
 | `/stat` | 查看自己的游戏统计数据 | `orcak.command.stat` |
 | `/stat <玩家名>` | 查看指定玩家的游戏数据 | `orcak.command.stat` |
+| `/chatcolor <名字颜色> [消息颜色]` | 设置聊天颜色 | `orcak.command.chatcolor` |
+| `/514` | 自杀 | 默认 |
+| `/k` | 自杀（快捷方式） | 默认 |
 
 ### 管理员命令
 
@@ -98,6 +112,9 @@ Orcak 是一个综合性的 Minecraft 无政府服务器插件，提供自定义
 | `/orcak sync` | 同步所有玩家的原版数据 | `orcak.admin.sync` |
 | `/orcak sync <玩家>` | 同步指定玩家的原版数据 | `orcak.admin.sync` |
 | `/orcak set <玩家> <字段> <值>` | 手动修改玩家数据 | `orcak.admin.set` |
+| `/orcak mute <玩家>` | 禁言指定玩家 | `orcak.admin.mute` |
+| `/orcak unmute <玩家>` | 取消禁言指定玩家 | `orcak.admin.mute` |
+| `/orcak say <玩家> <消息>` | 以指定玩家名义发送消息 | `orcak.admin.say` |
 
 **支持的字段：**
 - `playtime` / `time` - 游玩时间（秒）
@@ -105,6 +122,36 @@ Orcak 是一个综合性的 Minecraft 无政府服务器插件，提供自定义
 - `deaths` / `death` - 死亡数量
 
 ### 聊天颜色命令
+
+#### 独立命令（推荐）
+
+| 命令 | 描述 | 权限 |
+|------|------|------|
+| `/chatcolor <名字颜色> [消息颜色]` | 设置聊天颜色 | `orcak.command.chatcolor` |
+
+**支持的格式：**
+- **英文名称**：`red`, `blue`, `green`, `yellow`, `black`, `white` 等
+- **中文名称**：`红`, `蓝`, `绿`, `黄`, `黑`, `白` 等
+- **颜色代码**：`&c`, `&9`, `&a`, `&e` 等
+
+**示例：**
+```bash
+# 使用英文名称
+/chatcolor red green
+
+# 使用中文名称
+/chatcolor 红 绿
+
+# 使用颜色代码
+/chatcolor &c &a
+
+# 只设置名字颜色
+/chatcolor blue
+/chatcolor 蓝
+/chatcolor &9
+```
+
+#### 旧版命令（兼容）
 
 | 命令 | 描述 | 权限 |
 |------|------|------|
@@ -186,6 +233,8 @@ chat-rate-limit:
   # 警告消息内容
   warning-message: "&c请不要频繁发送消息！"
   duplicate-warning-message: "&c请不要重复发送相同的消息！"
+  # 禁言警告消息内容
+  mute-warning-message: "&c你已被禁言，无法发送消息！"
 
 # 区块凋落物限制设置
 chunk-item-limits:
@@ -238,12 +287,15 @@ damage-limit:
 |------|------|------|
 | `orcak.bypass.help` | 绕过自定义帮助，使用原版 | OP |
 | `orcak.command.stat` | 使用 /stat 命令 | 所有玩家 |
-| `orcak.command.color` | 设置聊天颜色 | 所有玩家 |
+| `orcak.command.chatcolor` | 使用 /chatcolor 命令 | 所有玩家 |
+| `orcak.command.color` | 使用 /orcak color 命令（旧版） | 所有玩家 |
 | `orcak.chat.bypass` | 绕过聊天频率限制 | OP |
 | `orcak.damage.bypass` | 绕过伤害限制 | OP |
 | `orcak.admin` | Orcak 管理员总权限 | OP |
 | `orcak.admin.sync` | 同步原版数据 | OP |
 | `orcak.admin.set` | 修改玩家数据 | OP |
+| `orcak.admin.mute` | 禁言/取消禁言玩家 | OP |
+| `orcak.admin.say` | 以指定玩家名义发送消息 | OP |
 
 ## 💡 使用示例
 
@@ -287,12 +339,33 @@ K/D 比率：2.33
 /orcak set Steve kills 100
 ```
 
+### 自杀命令
+```bash
+# 使用 /514 自杀
+/514
+
+# 使用 /k 自杀（快捷方式）
+/k
+
+# 效果：直接将生命值设置为0，玩家死亡
+```
+
 ### 设置聊天颜色
 ```bash
-# 只设置名字颜色为红色
-/orcak color &c
+# 使用新命令（推荐）
+# 使用英文名称
+/chatcolor red green
 
-# 同时设置名字和消息颜色
+# 使用中文名称
+/chatcolor 红 绿
+
+# 使用颜色代码
+/chatcolor &c &a
+
+# 只设置名字颜色
+/chatcolor blue
+
+# 使用旧版命令（兼容）
 /orcak color &c &a
 
 # 查看效果（聊天时会显示）
@@ -321,11 +394,24 @@ chat-rate-limit:
   enabled: true              # 启用限制
   interval-seconds: 1        # 每条消息间隔1秒
   anti-duplicate: true       # 启用防重复
-  duplicate-window: 5        # 5秒内不允许重复消息
+  duplicate-window: 10       # 10秒内不允许重复消息
   bypass-for-admins: true    # 管理员豁免
   send-warning: true         # 发送警告
   warning-message: "&c请不要频繁发送消息！"
   duplicate-warning-message: "&c请不要重复发送相同的消息！"
+  mute-warning-message: "&c你已被禁言，无法发送消息！"  # 禁言提示
+```
+
+### 禁言与代发消息
+```bash
+# 禁言玩家
+/orcak mute Steve
+
+# 取消禁言
+/orcak unmute Steve
+
+# 以指定玩家名义发送消息（不受禁言影响）
+/orcak say Steve 这是一条系统公告
 ```
 
 ### 配置凋落物限制
@@ -368,10 +454,19 @@ damage-limit:
 - 无需等待下线即可查看最新数据
 
 ### 聊天颜色系统
+- 提供 `/chatcolor` 独立命令，支持英文/中文名称和颜色代码
 - 监听 `AsyncPlayerChatEvent` 动态应用颜色
 - 支持 Folia 异步线程环境
 - 颜色代码自动转换（& → §）
 - 优先使用玩家自定义颜色，回退到全局默认配置
+- 智能 Tab 补全支持
+
+### 禁言与代发消息系统
+- **禁言功能**：管理员可禁言/解禁玩家，禁言状态持久化存储
+- **代发消息**：管理员可以任何玩家名义发送消息，不受禁言影响
+- **权限控制**：严格限制仅管理员可使用（`orcak.admin.mute`, `orcak.admin.say`）
+- **在线通知**：被禁言/解禁的玩家在线时会收到即时通知
+- **日志记录**：代发消息会在控制台记录操作日志
 
 ### 区块管理系统
 - **智能调度**：Folia 环境使用主线程同步任务，非 Folia 使用异步任务
@@ -382,6 +477,7 @@ damage-limit:
 ### 聊天频率限制
 - **高优先级处理**：使用 HIGH 优先级确保及时拦截
 - **时间窗口检测**：精确计算消息间隔和重复检测
+- **禁言检查**：在频率检查之前优先检查禁言状态
 - **线程安全**：使用 ConcurrentHashMap 存储玩家消息记录
 - **Folia 兼容**：支持 Folia 服务器的异步调度
 
@@ -398,7 +494,7 @@ damage-limit:
 mvn clean package
 ```
 
-编译后的 JAR 文件位于 `target/Orcak-1.2.jar`
+编译后的 JAR 文件位于 `target/Orcak-1.4.jar`
 
 ### 依赖项
 - **Paper API** 1.21.4-R0.1-SNAPSHOT
@@ -414,7 +510,9 @@ src/main/java/top/mcocet/orcak/
 ├── PlayerStats.java               # 玩家数据模型
 ├── HelpCommandExecutor.java       # 帮助命令监听器
 ├── StatCommandExecutor.java       # 统计命令执行器
-├── OrcakCommand.java              # 管理命令执行器
+── OrcakCommand.java              # 管理命令执行器
+├── ChatColorCommand.java          # 聊天颜色命令执行器
+├── SuicideCommand.java            # 自杀命令执行器
 ├── PlayerDataListener.java        # 玩家数据事件监听器
 ├── ChatColorListener.java         # 聊天颜色监听器
 ├── ChatRateLimitListener.java     # 聊天频率限制监听器

@@ -80,6 +80,7 @@ public class DatabaseManager {
                 deaths INTEGER DEFAULT 0,
                 name_color TEXT DEFAULT '&f',
                 message_color TEXT DEFAULT '&7',
+                is_muted INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -99,6 +100,11 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 // 列已存在，忽略错误
             }
+            try {
+                stmt.execute("ALTER TABLE player_stats ADD COLUMN is_muted INTEGER DEFAULT 0;");
+            } catch (SQLException e) {
+                // 列已存在，忽略错误
+            }
         }
     }
     
@@ -114,8 +120,8 @@ public class DatabaseManager {
      */
     public synchronized void savePlayerStats(PlayerStats stats) {
         String sql = """
-            INSERT INTO player_stats (player_uuid, player_name, play_time, last_login_time, kills, deaths, name_color, message_color, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            INSERT INTO player_stats (player_uuid, player_name, play_time, last_login_time, kills, deaths, name_color, message_color, is_muted, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(player_uuid) DO UPDATE SET
                 player_name = excluded.player_name,
                 play_time = excluded.play_time,
@@ -124,6 +130,7 @@ public class DatabaseManager {
                 deaths = excluded.deaths,
                 name_color = excluded.name_color,
                 message_color = excluded.message_color,
+                is_muted = excluded.is_muted,
                 updated_at = CURRENT_TIMESTAMP;
             """;
         
@@ -136,6 +143,7 @@ public class DatabaseManager {
             pstmt.setInt(6, stats.getDeaths());
             pstmt.setString(7, stats.getNameColor());
             pstmt.setString(8, stats.getMessageColor());
+            pstmt.setInt(9, stats.isMuted() ? 1 : 0);
             pstmt.executeUpdate();
             
             // 更新缓存
@@ -170,7 +178,8 @@ public class DatabaseManager {
                         rs.getInt("kills"),
                         rs.getInt("deaths"),
                         rs.getString("name_color"),
-                        rs.getString("message_color")
+                        rs.getString("message_color"),
+                        rs.getInt("is_muted") == 1
                     );
                     
                     // 加入缓存
@@ -417,5 +426,36 @@ public class DatabaseManager {
         
         savePlayerStats(stats);
         return true;
+    }
+    
+    /**
+     * 禁言玩家
+     */
+    public synchronized boolean mutePlayer(UUID playerId, String playerName) {
+        PlayerStats stats = loadPlayerStats(playerId, playerName);
+        stats.setMuted(true);
+        savePlayerStats(stats);
+        return true;
+    }
+    
+    /**
+     * 取消禁言玩家
+     */
+    public synchronized boolean unmutePlayer(UUID playerId, String playerName) {
+        PlayerStats stats = loadPlayerStats(playerId, playerName);
+        stats.setMuted(false);
+        savePlayerStats(stats);
+        return true;
+    }
+    
+    /**
+     * 检查玩家是否被禁言
+     */
+    public synchronized boolean isPlayerMuted(UUID playerId) {
+        PlayerStats stats = playerStatsCache.get(playerId);
+        if (stats != null) {
+            return stats.isMuted();
+        }
+        return false;
     }
 }

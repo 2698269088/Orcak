@@ -52,15 +52,29 @@ public class ConfigManager {
                 configFile = new File(plugin.getDataFolder(), "config.yml");
             }
             
-            config = YamlConfiguration.loadConfiguration(configFile);
+            try {
+                config = YamlConfiguration.loadConfiguration(configFile);
+                plugin.getLogger().info("配置文件加载成功");
+            } catch (Exception e) {
+                plugin.getLogger().severe("配置文件加载失败: " + e.getMessage());
+                plugin.getLogger().severe("将使用默认配置");
+                e.printStackTrace();
+                // 创建一个空的配置对象
+                config = new YamlConfiguration();
+            }
             
             // 从jar中读取默认配置
             InputStream defaultStream = plugin.getResource("config.yml");
             if (defaultStream != null) {
-                YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(
-                    new java.io.InputStreamReader(defaultStream, StandardCharsets.UTF_8)
-                );
-                config.setDefaults(defaultConfig);
+                try {
+                    YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(
+                        new java.io.InputStreamReader(defaultStream, StandardCharsets.UTF_8)
+                    );
+                    config.setDefaults(defaultConfig);
+                    plugin.getLogger().info("默认配置设置成功");
+                } catch (Exception e) {
+                    plugin.getLogger().warning("无法加载默认配置: " + e.getMessage());
+                }
             }
         } finally {
             configLock.writeLock().unlock();

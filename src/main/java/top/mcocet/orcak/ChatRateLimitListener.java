@@ -19,6 +19,7 @@ public class ChatRateLimitListener implements Listener {
     
     private final Orcak plugin;
     private final ConfigManager configManager;
+    private final DatabaseManager databaseManager;
     
     // 记录每个玩家最后一条消息的发送时间
     private final Map<UUID, Long> lastMessageTime = new ConcurrentHashMap<>();
@@ -47,9 +48,10 @@ public class ChatRateLimitListener implements Listener {
         }
     }
     
-    public ChatRateLimitListener(Orcak plugin, ConfigManager configManager) {
+    public ChatRateLimitListener(Orcak plugin, ConfigManager configManager, DatabaseManager databaseManager) {
         this.plugin = plugin;
         this.configManager = configManager;
+        this.databaseManager = databaseManager;
     }
     
     /**
@@ -66,6 +68,28 @@ public class ChatRateLimitListener implements Listener {
         
         // 检查是否为管理员，如果是则跳过限制
         if (shouldBypassForAdmins() && isAdmin(player)) {
+            return;
+        }
+        
+        // 检查是否为全局禁言
+        if (plugin.isGlobalMuted()) {
+            event.setCancelled(true);
+            
+            if (shouldSendWarning()) {
+                sendWarning(player, getGlobalMuteWarningMessage());
+            }
+            
+            return;
+        }
+        
+        // 检查玩家是否被禁言
+        if (databaseManager.isPlayerMuted(player.getUniqueId())) {
+            event.setCancelled(true);
+            
+            if (shouldSendWarning()) {
+                sendWarning(player, getMuteWarningMessage());
+            }
+            
             return;
         }
         
@@ -229,5 +253,19 @@ public class ChatRateLimitListener implements Listener {
      */
     private String getDuplicateWarningMessage() {
         return configManager.getConfig().getString("chat-rate-limit.duplicate-warning-message", "&c请不要重复发送相同的消息！");
+    }
+    
+    /**
+     * 获取禁言警告消息
+     */
+    private String getMuteWarningMessage() {
+        return configManager.getConfig().getString("chat-rate-limit.mute-warning-message", "&c你已被禁言，无法发送消息！");
+    }
+    
+    /**
+     * 获取全局禁言警告消息
+     */
+    private String getGlobalMuteWarningMessage() {
+        return configManager.getConfig().getString("chat-rate-limit.global-mute-warning-message", "&c服务器已开启全员禁言！");
     }
 }

@@ -44,6 +44,10 @@ chat-rate-limit:
   # 警告消息内容
   warning-message: "&c请不要频繁发送消息！"
   duplicate-warning-message: "&c请不要重复发送相同的消息！"
+  # 禁言警告消息内容
+  mute-warning-message: "&c你已被禁言，无法发送消息！"
+  # 全局禁言警告消息内容
+  global-mute-warning-message: "&c服务器已开启全员禁言！"
 
 # 区块凋落物限制设置
 chunk-item-limits:
@@ -70,3 +74,290 @@ damage-limit:
   send-warning: true
   # 警告消息内容（{damage}会被替换为实际伤害值，{max}会被替换为最大伤害值）
   warning-message: "&c你的攻击伤害过高！原始伤害: {damage}, 限制为: {max}"
+
+# 自定义死亡消息设置
+death-messages:
+  # 是否启用自定义死亡消息系统
+  enabled: false
+
+  # 死亡消息颜色设置（使用 Minecraft 颜色代码: &0-&9, &a-&f）
+  # 可用颜色代码:
+  # &0-黑色 &1-深蓝 &2-深绿 &3-深青 &4-深红 &5-紫色 &6-金色 &7-灰色
+  # &8-深灰 &9-蓝色 &a-绿色 &b-青色 &c-红色 &d-粉色 &e-黄色 &f-白色
+  colors:
+    # 死者名称颜色（默认粉色 &d）
+    victim-color: "&d"
+    # 击杀者名称颜色（默认青蓝色 &b）
+    killer-color: "&b"
+    # 物品名称颜色（默认绿色 &a）
+    item-color: "&a"
+    # 死亡消息文本颜色（默认白色 &f）
+    message-color: "&f"
+
+  # ==================== 暴力行为类 ====================
+  # 占位符说明:
+  # {victim} - 死者名称
+  # {killer} - 击杀者名称
+  # {item} - 物品名称
+
+  violence:
+    # 死者被击杀者杀死了
+    player: '{victim} 被 {killer} 杀死了'
+    # 死者被击杀者用物品杀死了
+    player-item: '{victim} 被 {killer} 用 {item} 杀死了'
+
+    # 死者被击杀者杀死了（生物攻击）
+    mob: '{victim} 被 {killer} 杀死了'
+    # 死者被击杀者用物品杀死了
+    mob-item: '{victim} 被 {killer} 用 {item} 杀死了'
+
+    # 死者被蛰死了
+    sting: '{victim} 被蛰死了'
+    # 死者被击杀者蛰死了
+    sting-player: '{victim} 被 {killer} 蛰死了'
+    # 死者被击杀者用物品蛰死了
+    sting-item: '{victim} 被 {killer} 用 {item} 蛰死了'
+
+    # 死者被击杀者射杀
+    arrow: '{victim} 被 {killer} 射杀'
+    # 死者被击杀者用物品射杀
+    arrow-item: '{victim} 被 {killer} 用 {item} 射杀'
+
+    # 死者被击杀者刺穿了（三叉戟）
+    trident: '{victim} 被 {killer} 刺穿了'
+    # 死者被击杀者用物品刺穿了
+    trident-item: '{victim} 被 {killer} 用 {item} 刺穿了'
+
+    # 死者被击杀者用火球烧死了
+    fireball: '{victim} 被 {killer} 用火球烧死了'
+    # 死者被击杀者用物品发射的火球烧死了
+    fireball-item: '{victim} 被 {killer} 用 {item} 发射的火球烧死了'
+
+    # 死者被击杀者给砸死了（雪球、鸡蛋等）
+    thrown: '{victim} 被 {killer} 给砸死了'
+    # 死者被击杀者用物品给砸死了
+    thrown-item: '{victim} 被 {killer} 用 {item} 给砸死了'
+
+    # 死者随着一声巨响消失了（烟花火箭）
+    fireworks: '{victim} 随着一声巨响消失了'
+    # 死者在与击杀者战斗时随着一声巨响消失了
+    fireworks-player: '{victim} 在与 {killer} 战斗时随着一声巨响消失了'
+    # 死者随着击杀者用物品发射的烟花发出的巨响消失了
+    fireworks-item: '{victim} 随着 {killer} 用 {item} 发射的烟花发出的巨响消失了'
+
+    # 死者被击杀者发射的头颅射杀（凋灵之首）
+    witherSkull: '{victim} 被 {killer} 发射的头颅射杀'
+    # 死者被击杀者用物品发射的头颅射杀
+    witherSkull-item: '{victim} 被 {killer} 用 {item} 发射的头颅射杀'
+
+    # 死者在试图伤害击杀者时被杀（荆棘）
+    thorns: '{victim} 在试图伤害 {killer} 时被杀'
+    # 死者在试图伤害击杀者时被物品杀死
+    thorns-item: '{victim} 在试图伤害 {killer} 时被 {item} 杀死'
+
+    # 死者被击杀者使用的魔法杀死了
+    indirectMagic: '{victim} 被 {killer} 使用的魔法杀死了'
+    # 死者被击杀者用物品杀死了
+    indirectMagic-item: '{victim} 被 {killer} 用 {item} 杀死了'
+
+    # 死者被一道音波尖啸抹除了（监守者）
+    sonic_boom: '{victim} 被一道音波尖啸抹除了'
+    # 死者在试图逃离击杀者时被一道音波尖啸抹除了
+    sonic_boom-player: '{victim} 在试图逃离 {killer} 时被一道音波尖啸抹除了'
+    # 死者在试图逃离持有物品的击杀者时被一道音波尖啸抹除了
+    sonic_boom-item: '{victim} 在试图逃离持有 {item} 的 {killer} 时被一道音波尖啸抹除了'
+
+    # 死者被龙息烤熟了
+    dragonBreath: '{victim} 被龙息烤熟了'
+    # 死者被击杀者的龙息烤熟了
+    dragonBreath-player: '{victim} 被 {killer} 的龙息烤熟了'
+
+    # 死者被击杀者一锤毙命（重锤）
+    mace_smash: '{victim} 被 {killer} 一锤毙命'
+    # 死者被击杀者用物品一锤毙命
+    mace_smash-item: '{victim} 被 {killer} 用 {item} 一锤毙命'
+
+    # 死者被击杀者刺穿了（矛）
+    spear: '{victim} 被 {killer} 刺穿了'
+    # 死者被击杀者用物品刺穿了
+    spear-item: '{victim} 被 {killer} 用 {item} 刺穿了'
+
+  # ==================== 负面效果类 ====================
+  negative-effects:
+    # 死者被烧死了（着火）
+    onFire: '{victim} 被烧死了'
+    # 死者在与击杀者战斗时被烤得酥脆
+    onFire-player: '{victim} 在与 {killer} 战斗时被烤得酥脆'
+    # 死者在与持有物品的击杀者战斗时被烤得酥脆
+    onFire-item: '{victim} 在与持有 {item} 的 {killer} 战斗时被烤得酥脆'
+
+    # 死者被魔法杀死了
+    magic: '{victim} 被魔法杀死了'
+    # 死者在试图逃离击杀者时被魔法杀死了
+    magic-player: '{victim} 在试图逃离 {killer} 时被魔法杀死了'
+
+    # 死者凋零了
+    wither: '{victim} 凋零了'
+    # 死者在与击杀者战斗时凋零了
+    wither-player: '{victim} 在与 {killer} 战斗时凋零了'
+
+    # 死者饿死了
+    starve: '{victim} 饿死了'
+    # 死者在与击杀者战斗时饿死了
+    starve-player: '{victim} 在与 {killer} 战斗时饿死了'
+
+  # ==================== 危险环境类 ====================
+  dangerous-environment:
+    # 死者被戳死了（仙人掌）
+    cactus: '{victim} 被戳死了'
+    # 死者在试图逃离击杀者时撞上了仙人掌
+    cactus-player: '{victim} 在试图逃离 {killer} 时撞上了仙人掌'
+
+    # 死者浴火焚身（火焰）
+    inFire: '{victim} 浴火焚身'
+    # 死者在与击杀者战斗时不慎走入了火中
+    inFire-player: '{victim} 在与 {killer} 战斗时不慎走入了火中'
+
+    # 死者试图在熔岩里游泳
+    lava: '{victim} 试图在熔岩里游泳'
+    # 死者在逃离击杀者时试图在熔岩里游泳
+    lava-player: '{victim} 在逃离 {killer} 时试图在熔岩里游泳'
+
+    # 死者发现了地板是熔岩做的（岩浆块）
+    hotFloor: '{victim} 发现了地板是熔岩做的'
+    # 死者因击杀者而步入危险之地
+    hotFloor-player: '{victim} 因 {killer} 而步入危险之地'
+
+    # 死者被甜浆果丛刺死了
+    sweetBerryBush: '{victim} 被甜浆果丛刺死了'
+    # 死者在试图逃离击杀者时被甜浆果丛刺死了
+    sweetBerryBush-player: '{victim} 在试图逃离 {killer} 时被甜浆果丛刺死了'
+
+    # 死者在墙里窒息而亡
+    inWall: '{victim} 在墙里窒息而亡'
+    # 死者在与击杀者战斗时在墙里窒息而亡
+    inWall-player: '{victim} 在与 {killer} 战斗时在墙里窒息而亡'
+
+    # 死者淹死了
+    drown: '{victim} 淹死了'
+    # 死者在试图逃离击杀者时淹死了
+    drown-player: '{victim} 在试图逃离 {killer} 时淹死了'
+
+    # 死者因脱水而死
+    dryout: '{victim} 因脱水而死'
+    # 死者在试图逃离击杀者时因脱水而死
+    dryout-player: '{victim} 在试图逃离 {killer} 时因脱水而死'
+
+    # 死者被冻死了
+    freeze: '{victim} 被冻死了'
+    # 死者被击杀者冻死了
+    freeze-player: '{victim} 被 {killer} 冻死了'
+
+    # 死者因被过度挤压而死
+    cramming: '{victim} 因被过度挤压而死'
+    # 死者被击杀者挤扁了
+    cramming-player: '{victim} 被 {killer} 挤扁了'
+
+    # 死者被闪电击中
+    lightningBolt: '{victim} 被闪电击中'
+    # 死者在与击杀者战斗时被闪电击中
+    lightningBolt-player: '{victim} 在与 {killer} 战斗时被闪电击中'
+
+    # 死者脱离了这个世界（世界边界）
+    outsideBorder: '{victim} 脱离了这个世界'
+    # 死者在与击杀者战斗时脱离了这个世界
+    outsideBorder-player: '{victim} 在与 {killer} 战斗时脱离了这个世界'
+
+    # 死者掉出了这个世界（虚空）
+    outOfWorld: '{victim} 掉出了这个世界'
+    # 死者与击杀者不共戴天
+    outOfWorld-player: '{victim} 与 {killer} 不共戴天'
+
+  # ==================== 意外事故类 ====================
+  accidents:
+    # 死者落地过猛（摔落）
+    fall: '{victim} 落地过猛'
+    # 死者在试图逃离击杀者时落地过猛
+    fall-player: '{victim} 在试图逃离 {killer} 时落地过猛'
+
+    # 死者被石笋刺穿了
+    stalagmite: '{victim} 被石笋刺穿了'
+    # 死者在与击杀者战斗时被石笋刺穿了
+    stalagmite-player: '{victim} 在与 {killer} 战斗时被石笋刺穿了'
+
+    # 死者被下落的铁砧压扁了
+    anvil: '{victim} 被下落的铁砧压扁了'
+    # 死者在与击杀者战斗时被下落的铁砧压扁了
+    anvil-player: '{victim} 在与 {killer} 战斗时被下落的铁砧压扁了'
+
+    # 死者被下落的钟乳石刺穿了
+    fallingStalactite: '{victim} 被下落的钟乳石刺穿了'
+    # 死者在与击杀者战斗时被下落的钟乳石刺穿了
+    fallingStalactite-player: '{victim} 在与 {killer} 战斗时被下落的钟乳石刺穿了'
+
+    # 死者被下落的方块压扁了
+    fallingBlock: '{victim} 被下落的方块压扁了'
+    # 死者在与击杀者战斗时被下落的方块压扁了
+    fallingBlock-player: '{victim} 在与 {killer} 战斗时被下落的方块压扁了'
+
+    # 死者感受到了动能（鞘翅撞墙）
+    flyIntoWall: '{victim} 感受到了动能'
+    # 死者在试图逃离击杀者时感受到了动能
+    flyIntoWall-player: '{victim} 在试图逃离 {killer} 时感受到了动能'
+
+  # ==================== 摔死类 ====================
+  fall-variants:
+    # 死者从高处摔了下来
+    fell-accident-generic: '{victim} 从高处摔了下来'
+    # 死者从梯子上摔了下来
+    fell-accident-ladder: '{victim} 从梯子上摔了下来'
+    # 死者从脚手架上摔了下来
+    fell-accident-scaffolding: '{victim} 从脚手架上摔了下来'
+    # 死者从藤蔓上摔了下来
+    fell-accident-vines: '{victim} 从藤蔓上摔了下来'
+    # 死者从垂泪藤上摔了下来
+    fell-accident-weeping_vines: '{victim} 从垂泪藤上摔了下来'
+    # 死者从缠怨藤上摔了下来
+    fell-accident-twisting_vines: '{victim} 从缠怨藤上摔了下来'
+    # 死者在攀爬时摔了下来
+    fell-accident-other_climbable: '{victim} 在攀爬时摔了下来'
+    # 死者在水中摔了下来
+    fell-accident-water: '{victim} 在水中摔了下来'
+
+    # 死者注定要摔死
+    fell-killer: '{victim} 注定要摔死'
+    # 死者因为击杀者注定要摔死
+    fell-assist: '{victim} 因为 {killer} 注定要摔死'
+    # 死者因为击杀者使用了物品注定要摔死
+    fell-assist-item: '{victim} 因为 {killer} 使用了 {item} 注定要摔死'
+    # 死者摔伤得太重并被击杀者完结了生命
+    fell-finish: '{victim} 摔伤得太重并被 {killer} 完结了生命'
+    # 死者摔伤得太重并被击杀者用物品完结了生命
+    fell-finish-item: '{victim} 摔伤得太重并被 {killer} 用 {item} 完结了生命'
+
+  # ==================== 炸死类 ====================
+  explosions:
+    # 死者爆炸了
+    explosion: '{victim} 爆炸了'
+    # 死者被击杀者炸死了
+    explosion-player: '{victim} 被 {killer} 炸死了'
+    # 死者被击杀者用物品炸死了
+    explosion-player-item: '{victim} 被 {killer} 用 {item} 炸死了'
+
+    # 死者被[刻意的游戏设计]杀死了（床/重生锚爆炸）
+    badRespawnPoint: '{victim} 被[刻意的游戏设计]杀死了'
+
+  # ==================== 杂项类 ====================
+  miscellaneous:
+    # 死者死了（通用）
+    generic: '{victim} 死了'
+    # 死者死于击杀者
+    generic-player: '{victim} 死于 {killer}'
+
+    # 死者被杀死了（/kill命令）
+    genericKill: '{victim} 被杀死了'
+    # 死者在与击杀者战斗时被杀死了
+    genericKill-player: '{victim} 在与 {killer} 战斗时被杀死了'
+
+    # 死者被不为人知的魔法杀死了（消息太长）
+    even_more_magic: '{victim} 被不为人知的魔法杀死了'

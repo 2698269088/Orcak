@@ -15,6 +15,7 @@ public class PlayerStats {
     private int deaths; // 被击杀数量
     private String nameColor; // 玩家名字颜色
     private String messageColor; // 聊天消息颜色
+    private boolean isMuted; // 是否被禁言
     
     public PlayerStats(UUID playerId, String playerName) {
         this.playerId = playerId;
@@ -25,6 +26,7 @@ public class PlayerStats {
         this.deaths = 0;
         this.nameColor = "&f"; // 默认白色
         this.messageColor = "&7"; // 默认灰色
+        this.isMuted = false; // 默认不禁言
     }
     
     public PlayerStats(UUID playerId, String playerName, long playTime, long lastLoginTime, int kills, int deaths) {
@@ -36,6 +38,7 @@ public class PlayerStats {
         this.deaths = deaths;
         this.nameColor = "&f";
         this.messageColor = "&7";
+        this.isMuted = false;
     }
     
     public PlayerStats(UUID playerId, String playerName, long playTime, long lastLoginTime, int kills, int deaths, String nameColor, String messageColor) {
@@ -47,6 +50,19 @@ public class PlayerStats {
         this.deaths = deaths;
         this.nameColor = nameColor != null ? nameColor : "&f";
         this.messageColor = messageColor != null ? messageColor : "&7";
+        this.isMuted = false;
+    }
+    
+    public PlayerStats(UUID playerId, String playerName, long playTime, long lastLoginTime, int kills, int deaths, String nameColor, String messageColor, boolean isMuted) {
+        this.playerId = playerId;
+        this.playerName = playerName;
+        this.playTime = playTime;
+        this.lastLoginTime = lastLoginTime;
+        this.kills = kills;
+        this.deaths = deaths;
+        this.nameColor = nameColor != null ? nameColor : "&f";
+        this.messageColor = messageColor != null ? messageColor : "&7";
+        this.isMuted = isMuted;
     }
     
     // Getters and Setters
@@ -116,6 +132,14 @@ public class PlayerStats {
     
     public void setMessageColor(String messageColor) {
         this.messageColor = messageColor;
+    }
+    
+    public boolean isMuted() {
+        return isMuted;
+    }
+    
+    public void setMuted(boolean muted) {
+        this.isMuted = muted;
     }
     
     @Override

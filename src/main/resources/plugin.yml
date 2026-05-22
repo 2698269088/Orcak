@@ -1,9 +1,9 @@
 name: Orcak
-version: '1.2'
+version: '1.4'
 main: top.mcocet.orcak.Orcak
 api-version: '1.21'
 authors: [ MCOCET ]
-description: 一个综合性的 Minecraft 无政府服务器插件
+description: 一个综合性的 Minecraft 生存服务器插件
 website: https://home.mcocet.top
 folia-supported: true
 
@@ -12,9 +12,19 @@ commands:
     description: 查看玩家游戏统计数据
     usage: /stat [玩家名]
     permission: orcak.command.stat
+  chatcolor:
+    description: 设置聊天颜色
+    usage: /chatcolor [名字颜色] [消息颜色]
+    permission: orcak.command.chatcolor
+  514:
+    description: 自杀命令
+    usage: /514
+  k:
+    description: 自杀命令（快捷方式）
+    usage: /k
   orcak:
     description: Orcak 插件管理命令
-    usage: /orcak <sync|set|color|help>
+    usage: /orcak <sync|set|color|mute|unmute|muteall|say|follow|gamemode|reload|help>
     permission: orcak.admin
 
 permissions:
@@ -24,6 +34,9 @@ permissions:
   orcak.command.stat:
     description: 允许使用/stat命令查看统计数据
     default: true
+  orcak.command.chatcolor:
+    description: 允许设置聊天颜色
+    default: true
   orcak.admin:
     description: Orcak 管理员权限
     default: op
@@ -32,6 +45,21 @@ permissions:
     default: op
   orcak.admin.set:
     description: 允许修改玩家统计数据
+    default: op
+  orcak.admin.mute:
+    description: 允许禁言/取消禁言玩家
+    default: op
+  orcak.admin.say:
+    description: 允许以指定玩家名义发送消息
+    default: op
+  orcak.admin.follow:
+    description: 允许跟随玩家
+    default: op
+  orcak.admin.gamemode:
+    description: 允许锁定/解锁玩家游戏模式
+    default: op
+  orcak.admin.reload:
+    description: 允许重载配置文件
     default: op
   orcak.command.color:
     description: 允许设置聊天颜色

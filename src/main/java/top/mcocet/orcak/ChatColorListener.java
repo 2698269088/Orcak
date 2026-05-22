@@ -39,8 +39,8 @@ public class ChatColorListener implements Listener {
             nameColor = translateColorCodes(nameColor);
             messageColor = translateColorCodes(messageColor);
             
-            // 设置聊天格式: [名字颜色]玩家名 [消息颜色]消息内容
-            String format = nameColor + "%1$s" + messageColor + " %2$s";
+            // 设置聊天格式: [名字颜色]玩家名 §r>[消息颜色] 消息内容
+            String format = "<" + nameColor + "%1$s" + "§r>" + messageColor + " %2$s";
             event.setFormat(format);
         }
     }
