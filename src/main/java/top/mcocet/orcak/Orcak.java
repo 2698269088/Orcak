@@ -7,6 +7,9 @@ public final class Orcak extends JavaPlugin {
     private ConfigManager configManager;
     private DatabaseManager databaseManager;
     private boolean isGlobalMuted = false;
+    
+    // 存储被锁定位置的玩家及其锁定位置
+    private final java.util.Map<org.bukkit.entity.Player, org.bukkit.Location> lockedPositions = new java.util.HashMap<>();
 
     @Override
     public void onEnable() {
@@ -24,7 +27,10 @@ public final class Orcak extends JavaPlugin {
         
         // 注册玩家数据监听器
         getServer().getPluginManager().registerEvents(new PlayerDataListener(this, databaseManager), this);
-        
+
+        // 注册命令执行限制监听器
+        getServer().getPluginManager().registerEvents(new CommandLimitListener(this, configManager), this);
+
         // 注册聊天颜色监听器
         getServer().getPluginManager().registerEvents(new ChatColorListener(this, databaseManager), this);
         
@@ -45,6 +51,21 @@ public final class Orcak extends JavaPlugin {
         
         // 注册游戏模式锁定监听器
         getServer().getPluginManager().registerEvents(new GameModeLockListener(this), this);
+        
+        // 注册位置锁定监听器
+        getServer().getPluginManager().registerEvents(new PositionLockListener(this), this);
+        
+        // 注册IP限制监听器
+        getServer().getPluginManager().registerEvents(new IPLimitListener(this, configManager, databaseManager), this);
+        
+        // 注册踢人次数限制监听器
+        getServer().getPluginManager().registerEvents(new KickLimitListener(this, configManager), this);
+
+        // 初始化自定义帮助命令处理器
+        CustomHelpCommand customHelpCommand = new CustomHelpCommand(this, configManager);
+
+        // 注册命令拦截监听器
+        getServer().getPluginManager().registerEvents(new HelpCommandListener(customHelpCommand), this);
         
         // 注册stat命令执行器和补全器
         StatCommandExecutor statExecutor = new StatCommandExecutor(this, databaseManager);
@@ -68,6 +89,9 @@ public final class Orcak extends JavaPlugin {
         SuicideCommand suicideExecutor = new SuicideCommand(this);
         getCommand("514").setExecutor(suicideExecutor);
         getCommand("k").setExecutor(suicideExecutor);
+        
+        // 从数据库加载位置锁定信息
+        loadPositionLocks();
         
         getLogger().info("Orcak插件已启用！");
     }
@@ -122,5 +146,100 @@ public final class Orcak extends JavaPlugin {
      */
     public void setGlobalMuted(boolean globalMuted) {
         isGlobalMuted = globalMuted;
+    }
+    
+    /**
+     * 锁定玩家的位置
+     */
+    public void lockPlayerPosition(org.bukkit.entity.Player player, org.bukkit.Location location) {
+        lockedPositions.put(player, location);
+        
+        // 更新数据库中的位置锁定信息
+        top.mcocet.orcak.PlayerStats stats = databaseManager.getPlayerStats(player.getUniqueId());
+        if (stats != null) {
+            stats.setPosLocked(true);
+            stats.setLockedWorld(location.getWorld().getName());
+            stats.setLockedX(location.getX());
+            stats.setLockedY(location.getY());
+            stats.setLockedZ(location.getZ());
+            databaseManager.savePlayerStats(stats);
+        }
+    }
+    
+    /**
+     * 解锁玩家的位置
+     */
+    public void unlockPlayerPosition(org.bukkit.entity.Player player) {
+        lockedPositions.remove(player);
+        
+        // 更新数据库中的位置锁定信息
+        top.mcocet.orcak.PlayerStats stats = databaseManager.getPlayerStats(player.getUniqueId());
+        if (stats != null) {
+            stats.setPosLocked(false);
+            stats.setLockedWorld("");
+            stats.setLockedX(0.0);
+            stats.setLockedY(0.0);
+            stats.setLockedZ(0.0);
+            databaseManager.savePlayerStats(stats);
+        }
+    }
+    
+    /**
+     * 检查玩家位置是否被锁定
+     */
+    public boolean isPlayerPositionLocked(org.bukkit.entity.Player player) {
+        // 首先检查内存中的锁定状态
+        if (lockedPositions.containsKey(player)) {
+            return true;
+        }
+        
+        // 然后检查数据库中的锁定状态
+        top.mcocet.orcak.PlayerStats stats = databaseManager.getPlayerStats(player.getUniqueId());
+        return stats != null && stats.isPosLocked();
+    }
+    
+    /**
+     * 获取玩家的锁定位置
+     */
+    public org.bukkit.Location getLockedPosition(org.bukkit.entity.Player player) {
+        // 首先检查内存中的位置
+        if (lockedPositions.containsKey(player)) {
+            return lockedPositions.get(player);
+        }
+        
+        // 然后从数据库加载位置
+        top.mcocet.orcak.PlayerStats stats = databaseManager.getPlayerStats(player.getUniqueId());
+        if (stats != null && stats.isPosLocked()) {
+            org.bukkit.World world = org.bukkit.Bukkit.getWorld(stats.getLockedWorld());
+            if (world != null) {
+                return new org.bukkit.Location(world, stats.getLockedX(), stats.getLockedY(), stats.getLockedZ());
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 获取所有被锁定位置的玩家
+     */
+    public java.util.Set<org.bukkit.entity.Player> getLockedPlayers() {
+        return lockedPositions.keySet();
+    }
+    
+    /**
+     * 从数据库加载所有位置锁定信息
+     */
+    public void loadPositionLocks() {
+        // 遍历所有在线玩家并检查他们的位置锁定状态
+        for (org.bukkit.entity.Player player : getServer().getOnlinePlayers()) {
+            top.mcocet.orcak.PlayerStats stats = databaseManager.getPlayerStats(player.getUniqueId());
+            if (stats != null && stats.isPosLocked()) {
+                org.bukkit.World world = org.bukkit.Bukkit.getWorld(stats.getLockedWorld());
+                if (world != null) {
+                    org.bukkit.Location location = new org.bukkit.Location(world, stats.getLockedX(), stats.getLockedY(), stats.getLockedZ());
+                    lockedPositions.put(player, location);
+                }
+            }
+        }
     }
 }

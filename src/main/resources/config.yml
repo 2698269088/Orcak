@@ -7,6 +7,26 @@ enable-custom-help: true
 # help.txt文件路径（相对于插件数据目录）
 help-file-path: "command/help.txt"
 
+custom-help:
+  # 是否启用自定义帮助命令功能
+  enabled: false
+  # 需要支持帮助的命令列表（不含斜杠）
+  commands:
+    - "tp"
+    - "tpa"
+    - "tpahere"
+    - "home"
+    - "spawn"
+    - "warp"
+    - "kit"
+    - "vote"
+  # 帮助文件目录（相对于插件数据目录）
+  help-files-directory: "command"
+  # 是否显示文件读取失败的错误信息
+  show-error-messages: true
+  # 文件不存在时的提示消息
+  file-not-found-message: "&c未找到该命令的帮助文档！"
+
 # 聊天颜色设置
 chat-colors:
   # 默认玩家名字颜色 (使用 Minecraft 颜色代码: &0-&9, &a-&f)
@@ -62,6 +82,76 @@ chunk-item-limits:
   # 是否记录清理日志
   log-cleanup: false
 
+# IP限制设置
+ip-limits:
+  # 是否启用IP限制功能
+  enabled: true
+  # 单个IP最大注册玩家数
+  max-registrations: 5
+  # 单个IP最大同时在线登录数
+  max-logins: 3
+  # 注册超过限制时的提示消息
+  register-limit-message: "&c该IP已达到最大注册数量限制！"
+  # 登录超过限制时的提示消息
+  login-limit-message: "&c该IP已达到最大同时在线登录数量限制！"
+  # 排除的IP地址列表（这些IP不受限制）
+  excluded-ips:
+    - "127.0.0.1"
+    - "localhost"
+
+# 踢人次数限制设置（自动Ban）
+kick-limit:
+  # 是否启用踢人次数限制功能
+  enabled: false
+  # 最大被踢次数，超过此次数将被自动Ban
+  max-kicks: 5
+  # 踢人次数统计的时间窗口（分钟），超过此时间后重置计数
+  time-window-minutes: 60
+  # Ban的持续时间（分钟），设置为0表示永久Ban
+  ban-duration-minutes: 30
+  # 是否通知被Ban的玩家原因
+  notify-player: true
+  # Ban消息内容
+  ban-message: "&c你已被服务器封禁！原因：被踢出次数过多"
+  # 是否记录封禁日志
+  log-ban: true
+  # 累计被Ban次数达到此值时，将永久封禁玩家（设置为0表示禁用此功能）
+  max-bans-for-permanent: 3
+  # 永久封禁消息内容
+  permanent-ban-message: "&c你已被服务器永久封禁！原因：累计被Ban次数过多"
+
+# 命令执行限制设置
+command-limit:
+  # 是否启用命令执行限制功能
+  enabled: false
+  # 需要监控的命令列表（不含斜杠）
+  monitored-commands:
+    - "tp"
+    - "gamemode"
+    - "kick"
+    - "ban"
+    - "ban-ip"
+    - "op"
+    - "deop"
+    - "stop"
+    - "restart"
+    - "pl"
+    - "plugman"
+    - "plugin"
+    - "about"
+  # 时间窗口（分钟），从第一条命令开始计算
+  time-window-minutes: 5
+  # 最大命令执行次数，超过此次数将被踢出
+  max-executions: 20
+  # 管理员是否不受限制（建议设置为true，以防止管理员被踢出）
+  bypass-for-admins: true
+  # 是否通知被踢出的玩家原因
+  notify-player: true
+  # 踢出消息内容
+  kick-message: "&c你已被踢出服务器！原因：短时间内执行过多的敏感命令！"
+  # 是否记录踢出日志
+  log-kick: true
+
 # 玩家伤害限制设置
 damage-limit:
   # 是否启用玩家单次伤害限制
@@ -74,6 +164,20 @@ damage-limit:
   send-warning: true
   # 警告消息内容（{damage}会被替换为实际伤害值，{max}会被替换为最大伤害值）
   warning-message: "&c你的攻击伤害过高！原始伤害: {damage}, 限制为: {max}"
+
+anti-attack:
+  # 是否启用反击功能（数据包崩溃客户端）
+  # 警告！此功能可能会导致客户端崩溃，请谨慎使用！
+  # 默认关闭，不建议启用这个功能，攻击者拿到服务器权限之后，可能会利用此功能崩溃正常玩家的客户端
+  # 该功能仅适用于Java版客户端，用途也只是反击攻击者
+  # 所以，建议在生产环境中禁用此功能
+  enabled: false
+  # 允许使用反击命令的权限节点
+  permission: "orcak.anti-attack"
+  # 崩溃消息（显示给被反击的玩家）
+  crash-message: "&c检测到恶意行为，已执行反击！"
+  # 是否记录反击日志
+  log-actions: true
 
 # 自定义死亡消息设置
 death-messages:

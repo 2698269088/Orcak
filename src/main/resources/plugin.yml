@@ -1,5 +1,5 @@
 name: Orcak
-version: '1.4'
+version: '1.6'
 main: top.mcocet.orcak.Orcak
 api-version: '1.21'
 authors: [ MCOCET ]
@@ -64,3 +64,6 @@ permissions:
   orcak.command.color:
     description: 允许设置聊天颜色
     default: true
+  orcak.anti-attack:
+    description: 允许使用反击命令
+    default: op

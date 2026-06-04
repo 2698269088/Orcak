@@ -81,6 +81,11 @@ public class DatabaseManager {
                 name_color TEXT DEFAULT '&f',
                 message_color TEXT DEFAULT '&7',
                 is_muted INTEGER DEFAULT 0,
+                is_pos_locked INTEGER DEFAULT 0,
+                locked_world TEXT DEFAULT '',
+                locked_x REAL DEFAULT 0.0,
+                locked_y REAL DEFAULT 0.0,
+                locked_z REAL DEFAULT 0.0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -105,14 +110,55 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 // 列已存在，忽略错误
             }
+            try {
+                stmt.execute("ALTER TABLE player_stats ADD COLUMN is_pos_locked INTEGER DEFAULT 0;");
+            } catch (SQLException e) {
+                // 列已存在，忽略错误
+            }
+            try {
+                stmt.execute("ALTER TABLE player_stats ADD COLUMN locked_world TEXT DEFAULT '';");
+            } catch (SQLException e) {
+                // 列已存在，忽略错误
+            }
+            try {
+                stmt.execute("ALTER TABLE player_stats ADD COLUMN locked_x REAL DEFAULT 0.0;");
+            } catch (SQLException e) {
+                // 列已存在，忽略错误
+            }
+            try {
+                stmt.execute("ALTER TABLE player_stats ADD COLUMN locked_y REAL DEFAULT 0.0;");
+            } catch (SQLException e) {
+                // 列已存在，忽略错误
+            }
+            try {
+                stmt.execute("ALTER TABLE player_stats ADD COLUMN locked_z REAL DEFAULT 0.0;");
+            } catch (SQLException e) {
+                // 列已存在，忽略错误
+            }
         }
     }
-    
+
     /**
-     * 获取数据库连接
+     * 获取数据库连接（带健康检查）
      */
     public Connection getConnection() {
-        return connection;
+        try {
+            if (connection == null || connection.isClosed()) {
+                plugin.getLogger().warning("检测到数据库连接已关闭，尝试恢复...");
+                File dbFile = new File(plugin.getDataFolder(), "players.db");
+                connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
+                // 重新启用 WAL
+                try (Statement stmt = connection.createStatement()) {
+                    stmt.execute("PRAGMA journal_mode=WAL;");
+                    stmt.execute("PRAGMA foreign_keys=ON;");
+                }
+                plugin.getLogger().info("数据库连接已自动恢复");
+            }
+            return connection;
+        } catch (SQLException e) {
+            plugin.getLogger().severe("获取数据库连接失败: " + e.getMessage());
+            return null;
+        }
     }
     
     /**
@@ -120,8 +166,8 @@ public class DatabaseManager {
      */
     public synchronized void savePlayerStats(PlayerStats stats) {
         String sql = """
-            INSERT INTO player_stats (player_uuid, player_name, play_time, last_login_time, kills, deaths, name_color, message_color, is_muted, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            INSERT INTO player_stats (player_uuid, player_name, play_time, last_login_time, kills, deaths, name_color, message_color, is_muted, is_pos_locked, locked_world, locked_x, locked_y, locked_z, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(player_uuid) DO UPDATE SET
                 player_name = excluded.player_name,
                 play_time = excluded.play_time,
@@ -131,6 +177,11 @@ public class DatabaseManager {
                 name_color = excluded.name_color,
                 message_color = excluded.message_color,
                 is_muted = excluded.is_muted,
+                is_pos_locked = excluded.is_pos_locked,
+                locked_world = excluded.locked_world,
+                locked_x = excluded.locked_x,
+                locked_y = excluded.locked_y,
+                locked_z = excluded.locked_z,
                 updated_at = CURRENT_TIMESTAMP;
             """;
         
@@ -144,6 +195,11 @@ public class DatabaseManager {
             pstmt.setString(7, stats.getNameColor());
             pstmt.setString(8, stats.getMessageColor());
             pstmt.setInt(9, stats.isMuted() ? 1 : 0);
+            pstmt.setInt(10, stats.isPosLocked() ? 1 : 0);
+            pstmt.setString(11, stats.getLockedWorld());
+            pstmt.setDouble(12, stats.getLockedX());
+            pstmt.setDouble(13, stats.getLockedY());
+            pstmt.setDouble(14, stats.getLockedZ());
             pstmt.executeUpdate();
             
             // 更新缓存
@@ -181,6 +237,13 @@ public class DatabaseManager {
                         rs.getString("message_color"),
                         rs.getInt("is_muted") == 1
                     );
+                    
+                    // 设置位置锁定信息
+                    stats.setPosLocked(rs.getInt("is_pos_locked") == 1);
+                    stats.setLockedWorld(rs.getString("locked_world"));
+                    stats.setLockedX(rs.getDouble("locked_x"));
+                    stats.setLockedY(rs.getDouble("locked_y"));
+                    stats.setLockedZ(rs.getDouble("locked_z"));
                     
                     // 加入缓存
                     playerStatsCache.put(playerId, stats);
@@ -457,5 +520,110 @@ public class DatabaseManager {
             return stats.isMuted();
         }
         return false;
+    }
+
+    /**
+     * 获取所有玩家列表（来自 player_ips 表）
+     */
+    public synchronized java.util.List<Map<String, Object>> getAllPlayers() {
+        java.util.List<Map<String, Object>> players = new java.util.ArrayList<>();
+        String sql = "SELECT player_uuid, player_name, ip_address, first_ip, first_login_time, last_login_time, login_count FROM player_ips ORDER BY first_login_time DESC;";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> player = new java.util.HashMap<>();
+                player.put("uuid", rs.getString("player_uuid"));
+                player.put("name", rs.getString("player_name"));
+                player.put("ip", rs.getString("ip_address"));
+                player.put("first_ip", rs.getString("first_ip"));
+                player.put("first_login_time", rs.getLong("first_login_time"));
+                player.put("last_login_time", rs.getLong("last_login_time"));
+                player.put("login_count", rs.getInt("login_count"));
+                players.add(player);
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("查询所有玩家列表失败: " + e.getMessage());
+        }
+        return players;
+    }
+
+    /**
+     * 获取指定玩家的IP详细信息（来自 player_ips 表）
+     */
+    public synchronized Map<String, Object> getPlayerIpInfo(String playerName) {
+        String sql = "SELECT player_uuid, player_name, ip_address, first_ip, first_login_time, last_login_time, login_count FROM player_ips WHERE player_name = ?;";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, playerName);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Map<String, Object> info = new java.util.HashMap<>();
+                    info.put("uuid", rs.getString("player_uuid"));
+                    info.put("name", rs.getString("player_name"));
+                    info.put("ip", rs.getString("ip_address"));
+                    info.put("first_ip", rs.getString("first_ip"));
+                    info.put("first_login_time", rs.getLong("first_login_time"));
+                    info.put("last_login_time", rs.getLong("last_login_time"));
+                    info.put("login_count", rs.getInt("login_count"));
+                    return info;
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("查询玩家IP信息失败: " + playerName + " - " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 获取 player_stats 表中的所有玩家列表（包含没有IP记录的玩家）
+     */
+    public synchronized java.util.List<Map<String, Object>> getAllStatsPlayers() {
+        java.util.List<Map<String, Object>> players = new java.util.ArrayList<>();
+        String sql = """
+            SELECT
+                s.player_uuid,
+                s.player_name,
+                s.play_time,
+                s.last_login_time,
+                s.kills,
+                s.deaths,
+                s.name_color,
+                s.message_color,
+                s.is_muted,
+                i.ip_address,
+                i.first_ip,
+                i.first_login_time AS ip_first_login,
+                i.last_login_time AS ip_last_login,
+                i.login_count
+            FROM player_stats s
+            LEFT JOIN player_ips i ON s.player_uuid = i.player_uuid
+            ORDER BY s.created_at DESC;
+            """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> player = new java.util.HashMap<>();
+                player.put("uuid", rs.getString("player_uuid"));
+                player.put("name", rs.getString("player_name"));
+                player.put("play_time", rs.getLong("play_time"));
+                player.put("last_login_time", rs.getLong("last_login_time"));
+                player.put("kills", rs.getInt("kills"));
+                player.put("deaths", rs.getInt("deaths"));
+                player.put("name_color", rs.getString("name_color"));
+                player.put("message_color", rs.getString("message_color"));
+                player.put("is_muted", rs.getInt("is_muted") == 1);
+                player.put("ip", rs.getString("ip_address"));
+                player.put("first_ip", rs.getString("first_ip"));
+                player.put("ip_first_login", rs.getLong("ip_first_login"));
+                player.put("ip_last_login", rs.getLong("ip_last_login"));
+                player.put("login_count", rs.getInt("login_count"));
+                players.add(player);
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("查询所有统计玩家列表失败: " + e.getMessage());
+        }
+        return players;
     }
 }

@@ -73,6 +73,13 @@ Orcak 是一个综合性的 Minecraft 生存服务器插件，提供自定义帮
 - **代发消息**：以指定玩家名义广播消息（不受禁言影响）
 - **TAB 补全**：完整的命令自动补全支持，提升管理效率
 
+### 📍 玩家位置锁定
+- **坐标锁定**：可将玩家锁定在其当前位置或指定坐标，无法移动
+- **持久化存储**：锁定状态保存到数据库，服务器重启后依然有效
+- **灵活控制**：支持锁定到当前坐标或指定坐标（X, Y, Z, 世界）
+- **便捷解锁**：提供专门命令解除位置锁定
+- **权限管理**：需要特定权限才能使用锁定/解锁功能
+
 ### 🌐 兼容性
 - **Folia 支持**：完全兼容 Folia 的区域化多线程架构
 - **线程安全**：使用 ReadWriteLock 保护数据库操作
@@ -115,6 +122,8 @@ Orcak 是一个综合性的 Minecraft 生存服务器插件，提供自定义帮
 | `/orcak mute <玩家>` | 禁言指定玩家 | `orcak.admin.mute` |
 | `/orcak unmute <玩家>` | 取消禁言指定玩家 | `orcak.admin.mute` |
 | `/orcak say <玩家> <消息>` | 以指定玩家名义发送消息 | `orcak.admin.say` |
+| `/orcak lockpos <玩家> [x] [y] [z] [世界]` | 锁定玩家坐标，无法移动 | `orcak.admin.lockpos` |
+| `/orcak unlockpos <玩家>` | 解除玩家坐标锁定 | `orcak.admin.lockpos` |
 
 **支持的字段：**
 - `playtime` / `time` - 游玩时间（秒）
@@ -296,6 +305,7 @@ damage-limit:
 | `orcak.admin.set` | 修改玩家数据 | OP |
 | `orcak.admin.mute` | 禁言/取消禁言玩家 | OP |
 | `orcak.admin.say` | 以指定玩家名义发送消息 | OP |
+| `orcak.admin.lockpos` | 锁定/解锁玩家坐标 | OP |
 
 ## 💡 使用示例
 
@@ -400,6 +410,18 @@ chat-rate-limit:
   warning-message: "&c请不要频繁发送消息！"
   duplicate-warning-message: "&c请不要重复发送相同的消息！"
   mute-warning-message: "&c你已被禁言，无法发送消息！"  # 禁言提示
+```
+
+### 位置锁定功能
+```bash
+# 锁定玩家到当前坐标
+/orcak lockpos Steve
+
+# 锁定玩家到指定坐标
+/orcak lockpos Steve 100 64 200 world
+
+# 解除玩家位置锁定
+/orcak unlockpos Steve
 ```
 
 ### 禁言与代发消息
