@@ -46,6 +46,9 @@ public final class Orcak extends JavaPlugin {
         // 注册玩家伤害限制监听器
         getServer().getPluginManager().registerEvents(new DamageLimitListener(this, configManager), this);
         
+        // 注册药水效果限制监听器
+        getServer().getPluginManager().registerEvents(new PotionLimitListener(this, configManager), this);
+        
         // 注册死亡消息监听器
         getServer().getPluginManager().registerEvents(new DeathMessageListener(this, configManager), this);
         

@@ -1,5 +1,5 @@
 name: Orcak
-version: '1.6'
+version: '1.7'
 main: top.mcocet.orcak.Orcak
 api-version: '1.21'
 authors: [ MCOCET ]

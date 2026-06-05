@@ -1,6 +1,28 @@
 # Orcak插件配置文件
 # 配置选项将在未来版本中添加
 
+# 药水效果限制设置
+potion-limit:
+  # 是否启用药水效果限制功能
+  enabled: true
+  # 最大允许的药水等级（超过此等级的效果将被拦截）
+  max-level: 5
+  # 最大允许的持续时间（秒），超过此时间的效果将被拦截
+  max-duration: 3600
+  # 完全禁止的药水效果列表（使用Minecraft原版效果名称）
+  # 可用效果名称参考：https://hub.spigotmc.org/javadocs/spigot/org/bukkit/potion/PotionEffectType.html
+  blocked-effects:
+    - "HEALTH_BOOST"
+    - "ABSORPTION"
+  # 管理员是否不受限制
+  bypass-for-admins: true
+  # 是否记录被拦截的药水效果
+  log-blocked: true
+  # 是否通知玩家药水效果被拦截
+  notify-player: true
+  # 通知消息内容
+  notify-message: "&c你的药水效果等级或持续时间超过服务器限制，已被拦截！"
+
 # 是否启用自定义help命令
 enable-custom-help: true
 
